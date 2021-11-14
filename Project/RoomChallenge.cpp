@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <msp430.h>
+#include "EPD_SPI.h"
+#include "IMG.h"
 using namespace std;
 
 void initGpio(void);
@@ -24,7 +26,7 @@ void initGpio(void)
 int getData()
 {
     int count = 0;
-    initGpio();
+    //initGpio();
     while(count < 5)
     {
         if(!P5IN)
@@ -45,6 +47,11 @@ void RoomChallenge()
     if (buttonPresses >= buttonMinimumValue)
     {
         printf("Success with a value of: %d\n", buttonPresses);
+        EPD_Init();
+        EPD_ClearScreen();
+        Delay_ms(100);
+        EPD_DisplayImage(IMAGE_SPLASH);
+        EPD_Sleep();
     }
     else
     {

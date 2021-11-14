@@ -62,17 +62,17 @@ void SPI_Init(void){
 
     // Set up TEST BUTTON GPIO
 
-    P5DIR &= ~BIT5;
-    P5OUT |= BIT5;               // button pull down
-    P5REN |= BIT5;               // button pull up/down resistor enable
-    P5IES |= BIT5;               // button Hi/lo edge
-    P5IE  |= BIT5;               // button interrupt enabled
+    P5DIR &= ~BIT6;
+    P5OUT |= BIT6;               // button pull down
+    P5REN |= BIT6;               // button pull up/down resistor enable
+    P5IES |= BIT6;               // button Hi/lo edge
+    P5IE  &= ~BIT6;               // button interrupt disabled
 
     // Enable I/O Configuration
     PM5CTL0 &= ~LOCKLPM5;       // Enable I/O
 
-    P5IFG &= ~BIT5;
-    P8IFG &= ~BIT1;
+    //P5IFG &= ~BIT6;
+    //P8IFG &= ~BIT1;
 }
 
 void Delay_ms(uint16_t millis){
