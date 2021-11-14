@@ -33,7 +33,7 @@ int main() {
 
     while(P5IN){;} //pretend generation charge
 
-    printf("Room Select");
+    printf("Room Select\n");
 
     EPD_Init();
     EPD_ClearScreen();

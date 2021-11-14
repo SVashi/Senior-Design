@@ -26,13 +26,17 @@ void initGpio(void)
 int getData()
 {
     int count = 0;
-    //initGpio();
+    bool buttonPressed = false;
     while(count < 5)
     {
-        if(!P5IN)
+        if(!P5IN && !buttonPressed)
         {
-            __delay_cycles(400000);
             count = count + 1;
+            buttonPressed = true;
+        }
+        if (P5IN && buttonPressed)
+        {
+            buttonPressed = false;
         }
     }
     return count;
@@ -50,7 +54,7 @@ void RoomChallenge()
         EPD_Init();
         EPD_ClearScreen();
         Delay_ms(100);
-        EPD_DisplayImage(IMAGE_SPLASH);
+        EPD_ClearScreen();
         EPD_Sleep();
     }
     else
