@@ -1,36 +1,55 @@
 #include <stdio.h>
+#include <msp430.h>
 using namespace std;
 
-//Returns average to compare to main value
-int calculateAverage(int data[])
+void initGpio(void);
+
+void initGpio(void)
 {
-    int average = 0;
-    for (int i = 0; i < sizeof(data); i++)
-    {
-        average += data[i];
-    }
-    return average/(sizeof(data));
+    /* Configure P5.6 for hi/lo transition interrupt. */
+    P5OUT |= BIT6;
+    P5REN |= BIT6;
+    P5DIR = 0xFF ^ BIT6;
+    P5IES |= BIT6;
+    P5IE |= BIT6;
+
+    /* Disable the GPIO power-on default high-impedance mode. */
+    PM5CTL0 &= ~LOCKLPM5;
+
+    /* Clear pending interrupts. */
+    P5IFG = 0;
 }
 
 //Placeholder for proper data retrievals
-int* getData()
+int getData()
 {
-    int data[4] = {23.5, 27.9, 30.1, 29.4};
-    return data;
+    int count = 0;
+    initGpio();
+    while(count < 5)
+    {
+        if(!P5IN)
+        {
+            __delay_cycles(400000);
+            count = count + 1;
+        }
+    }
+    return count;
 }
 
 void RoomChallenge()
 {
-    int CrankMinimumValue = 25;
-    int *data;
+    int buttonMinimumValue = 5;
+    int buttonPresses;
 
-    data = getData();
-    if (calculateAverage(data) > CrankMinimumValue)
+    buttonPresses = getData();
+    if (buttonPresses >= buttonMinimumValue)
     {
-        printf("Success with a value of: %d\n", calculateAverage(data));
+        printf("Success with a value of: %d\n", buttonPresses);
     }
     else
     {
-        printf("Failure with a value of: %d\n", calculateAverage(data));
+        printf("Failure with a value of: %d\n", buttonPresses);
     }
 }
+
+
