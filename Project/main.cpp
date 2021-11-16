@@ -41,6 +41,14 @@ int main() {
     EPD_DisplayImage(IMAGE_SELROOM);
     EPD_Sleep();
 
+    while(P5IN){;} //pretend room sel
+
+    EPD_Init();
+    EPD_ClearScreen();
+    Delay_ms(100);
+    EPD_DisplayImage(IMAGE_ROOM1);
+    EPD_Sleep();
+
     RoomChallenge();
     BossBattle(7,0);
     return 0;

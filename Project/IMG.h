@@ -14,6 +14,8 @@ extern const uint8_t IMAGE_WHITE[];
 extern const uint8_t IMAGE_BLACK[];
 extern const uint8_t IMAGE_SPLASH[];
 extern const uint8_t IMAGE_SELROOM[];
+extern const uint8_t IMAGE_ROOM1[];
+extern const uint8_t IMAGE_BOSS1[];
 
 
 #endif /* IMG_H_ */

@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include "EPD_SPI.h"
 using namespace std;
 
 //Placeholder for pins
@@ -50,4 +51,8 @@ void BossBattle(int successes, int failures)
     {
         printf("Player Wins!");
     }
+
+    EPD_Init();
+    EPD_ClearScreen();
+    EPD_Sleep();
 }

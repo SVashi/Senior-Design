@@ -54,7 +54,7 @@ void RoomChallenge()
         EPD_Init();
         EPD_ClearScreen();
         Delay_ms(100);
-        EPD_ClearScreen();
+        EPD_DisplayImage(IMAGE_BOSS1);
         EPD_Sleep();
     }
     else
