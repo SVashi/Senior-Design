@@ -1,2 +1,1 @@
-#Need to add modular value to compare average
-#Need to create drive function instead of room challenge being in main
+#need to enable the CTPL trigger on SVSIV ISR and test updating screen to splash

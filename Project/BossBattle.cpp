@@ -1,58 +1,50 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include "EPD_SPI.h"
-using namespace std;
 
-//Placeholder for pins
-int getPinValues()
+#include "BossBattle.h"
+
+int getAttack()
 {
-    int randVal = rand() % 3 + 1;
-    if (randVal == 1)
-    {
-        return 11;
+    int count = 0;
+    for(int i=1; i<5; i++){
+        count += getButtonPress(i);
     }
-    return 00;
+    return count;
 }
 
 int playerTurn(int currentHP)
 {
-    int pinVal = getPinValues();
-    if (pinVal == 11)
-    {
-        currentHP = currentHP - 10;
+    clearButtonPress();
+    int minButtonPress = 5;
+
+    while(getAttack() < minButtonPress){
+        __low_power_mode_3();
     }
+    currentHP = currentHP - 100;
     return currentHP;
 }
 
 int bossTurn(int currentHP)
 {
-    int damage = rand() % 3 + 1;
+    int damage = 1;
     return currentHP - damage * 10;
 }
 
-void BossBattle(int successes, int failures)
+void BossBattle()
 {
-    int playerHP = 100 + successes * 10;
-    int bossHP = 100 + failures * 10;
+    EPD_FullScreen(IMAGE_BOSS1);
+    int playerHP = 100 + getSucceed() * 10;
+    int bossHP = 100 + getFail() * 10;
     while (playerHP > 0 && bossHP > 0)
     {
-        printf("Boss hp is %d, Player hp is %d\n", bossHP, playerHP);
         bossHP = playerTurn(bossHP);
         if (bossHP > 0)
         {
             playerHP = bossTurn(playerHP);
         }
     }
-    if (playerHP <= 0)
-    {
-        printf("Player Loses!");
-    }
-    else
-    {
-        printf("Player Wins!");
-    }
 
-    EPD_Init();
-    EPD_ClearScreen();
-    EPD_Sleep();
+
+
+
+
+
 }

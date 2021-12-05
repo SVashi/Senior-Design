@@ -11,7 +11,7 @@
 	<linkerCommandFile value="lnk_cc430f5123.cmd"/>
 	<rts value="libc.a"/>
 	<createSlaveProjects value=""/>
-	<templateProperties value="id=com.ti.common.project.core.emptyProjectWithMainTemplate_msp430"/>
+	<templateProperties value="id=com.ti.mcu.msp.framutilities.example_159,products=com.ti.mcu.msp.framutilities"/>
 	<filesToOpen value="main.c"/>
-	<isTargetManual value="false"/>
+	<isTargetManual value="true"/>
 </projectOptions>
