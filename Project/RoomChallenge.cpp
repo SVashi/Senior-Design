@@ -1,11 +1,10 @@
 
 #include "RoomChallenge.h"
 
-//Placeholder for proper data retrievals
 int getData()
 {
     int count = 0;
-    for(int i=1; i<5; i++){
+    for(int i=4; i>0; i--){
         count += getButtonPress(i);
     }
     return count;
@@ -15,18 +14,21 @@ void RoomChallenge()
 {
     uint8_t minButtonVal =0;
     clearButtonPress();
-    if(getRoomChallenge()>0){
-        EPD_FullScreen(IMAGE_ROOM1);
+    //challenge determination
+    EPD_FullScreen(IMAGE_ROOM1);
+    if(getRoomChallenge()>0){           //challenge 1
+        EPD_FullScreen(IMAGE_C2);
         minButtonVal = 5;
         clearRoomChallenge();
-    } else{
-        EPD_FullScreen(IMAGE_ROOM1);
+    } else{                             //challenge 2
+        EPD_FullScreen(IMAGE_C1);
         minButtonVal = 10;
         addRoomChallenge();
     }
-    while(getData() < minButtonVal){
+    while(getData() < minButtonVal){    //enter LPM until challenge completed
         __low_power_mode_3();
     }
+    EPD_FullScreen(IMAGE_RMSUC);
     addSucceed();
 }
 

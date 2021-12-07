@@ -14,14 +14,7 @@ uint8_t getState(){
 }
 
 void clearGame(){
-    GameState.state = 0;
-    GameState.b1Press = 0;
-    GameState.b2Press = 0;
-    GameState.b3Press = 0;
-    GameState.b4Press =0;
-    GameState.numSucceed =0;
-    GameState.numFail =0;
-    GameState.roomChallenge =0;
+    GameState = {0};
 }
 
 void setState(uint8_t stateUpdate){
