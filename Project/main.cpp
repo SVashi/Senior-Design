@@ -152,7 +152,7 @@ void ADC_Init(void){
     TA0CCR0 = (SMCLK_FREQUENCY/ADC_MONITOR_FREQUENCY);
     TA0CCR1 = TA0CCR0/2;
     TA0CCTL1 = OUTMOD_3;
-    TA0CTL = TASSEL__SMCLK | MC__UP;
+    TA0CTL = TASSEL__ACLK | MC__UP;
 
     /* Configure internal 2.0V reference. */
     while(REFCTL0 & REFGENBUSY);
@@ -169,9 +169,15 @@ void ADC_Init(void){
      * compute through power loss shutdown function to save the application
      * state and enter complete device shutdown.
      */
+
+    //ADC set up for 16 ADC12CLK cycles in one sampling period. ADC12 turned on
     ADC12CTL0 = ADC12SHT0_2 | ADC12ON;
+    //sets clock source to timer TA0
     ADC12CTL1 = ADC12SHS_1 | ADC12SSEL_0 | ADC12CONSEQ_2 | ADC12SHP;
+    //sets batmap to avcc
     ADC12CTL3 = ADC12BATMAP;
+
+    //enable comparator window,
     ADC12MCTL0 = ADC12INCH_31 | ADC12VRSEL_1 | ADC12WINC;
     ADC12HI = (uint16_t)(4096*((ADC_MONITOR_THRESHOLD+0.1)/2)/(2.0));
     ADC12LO = (uint16_t)(4096*(ADC_MONITOR_THRESHOLD/2)/(2.0));
