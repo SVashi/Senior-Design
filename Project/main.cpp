@@ -185,7 +185,6 @@ void ADC_Init(void){
 
     //enable comparator window, using A12 (P3.0)
     ADC12MCTL0 = ADC12INCH_12 | ADC12WINC;
-    //
     ADC12HI = (uint16_t)(4096*((ADC_MONITOR_THRESHOLD+0.1)/2)/(2.0));
     ADC12LO = (uint16_t)(4096*(ADC_MONITOR_THRESHOLD/2)/(2.0));
     ADC12IFGR2 &= ~(ADC12HIIFG | ADC12LOIFG);
