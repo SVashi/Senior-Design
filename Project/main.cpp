@@ -79,6 +79,9 @@ void GPIO_Init(void){
     P8OUT  = 0; P8DIR  = 0xFF;
     PJOUT  = 0; PJDIR  = 0xFFFF;
 
+    // Set P3.0 to analog input for ADC
+    P3SEL1 |= BIT0;
+    P3SEL0 |= BIT0;
 
     // Set P5.0 UCB1SIMO (01)
     P5SEL1 &= ~BIT0;
