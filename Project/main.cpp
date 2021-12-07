@@ -79,6 +79,9 @@ void GPIO_Init(void){
     P8OUT  = 0; P8DIR  = 0xFF;
     PJOUT  = 0; PJDIR  = 0xFFFF;
 
+    // Set P3.0 to analog input for ADC
+    P3SEL1 |= BIT0;
+    P3SEL0 |= BIT0;
 
     // Set P5.0 UCB1SIMO (01)
     P5SEL1 &= ~BIT0;
@@ -175,13 +178,14 @@ void ADC_Init(void){
 
     //ADC set up for 16 ADC12CLK cycles in one sampling period. ADC12 turned on
     ADC12CTL0 = ADC12SHT0_2 | ADC12ON;
-    //sets clock source to timer TA0
+    //sets clock source and trigger source to timer TA0
     ADC12CTL1 = ADC12SHS_1 | ADC12SSEL_0 | ADC12CONSEQ_2 | ADC12SHP;
     //sets batmap to avcc
-    ADC12CTL3 = ADC12BATMAP;
+    //ADC12CTL3 = ADC12BATMAP;
 
-    //enable comparator window,
-    ADC12MCTL0 = ADC12INCH_31 | ADC12VRSEL_1 | ADC12WINC;
+    //enable comparator window, using A12 (P3.0)
+    ADC12MCTL0 = ADC12INCH_12 | ADC12WINC;
+    //
     ADC12HI = (uint16_t)(4096*((ADC_MONITOR_THRESHOLD+0.1)/2)/(2.0));
     ADC12LO = (uint16_t)(4096*(ADC_MONITOR_THRESHOLD/2)/(2.0));
     ADC12IFGR2 &= ~(ADC12HIIFG | ADC12LOIFG);
