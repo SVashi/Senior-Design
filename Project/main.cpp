@@ -36,7 +36,6 @@ int main(void)
     //ADC_Init();
 
     while(1){
-        P1OUT &= ~BIT1;
         switch(getState()){
             case 0 : EPD_FullScreen(IMAGE_SPLASH);
                      __low_power_mode_3();
@@ -47,13 +46,17 @@ int main(void)
                      setState(2);
                      break;
             case 2 : RoomChallenge();
-                     if(getSucceed() < NUM_CHALLENGES){
-                         setState(1);
-                     } else {
-                         setState(3);
-                     }
+                     setState(3);
                      break;
-            case 3 : BossBattle();
+            case 3 : EPD_FullScreen(IMAGE_RMSUC);
+                     if(getSucceed() < NUM_CHALLENGES){
+                         setState(2);
+                     } else {
+                         setState(4);
+                     }
+                     __low_power_mode_3();
+                     break;
+            case 4 : BossBattle();
                      EPD_ClearScreen();
                      EPD_Sleep();
                      clearGame();
