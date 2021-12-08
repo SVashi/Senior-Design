@@ -33,11 +33,12 @@ const uint8_t WF_PARTIAL[159] =
 void Delay_ms(uint16_t millis){
 
     //Initialize Timer_B0 to use as delay counter
-    TB0CCTL0 = CCIE;                            // TBCCR0 interrupt enabled
+    TB0CCTL0 = CCIE_0;                            // TBCCR0 interrupt disabled
     TB0CCR0 = 0;                                // Set CCR to 0
     TB0CTL = TBSSEL__ACLK | ID__8 | MC__UP;     // ACLK, Divided 8, up mode
     TB0EX0 = TBIDEX_3;                          // ACLK = 32/8/4 = 1kHz = 1ms/count
     TB0CCR0 = millis;                           // Set CCR to delay time
+    TB0CCTL0 = CCIE;                            // TBCCR0 interrupt enabled
     __low_power_mode_3();                       // Turn off CPU, MCLK, SMCLK & enable interrupts
 
 }
@@ -315,6 +316,7 @@ void __attribute__ ((interrupt(TIMER0_B0_VECTOR))) Timer0_B0_ISR (void)
 #error Compiler not supported!
 #endif
 {
+    fullChargeFlag |= BIT1;
     TB0CTL = MC__STOP;
     //__low_power_mode_off_on_exit();
     __bic_SR_register_on_exit(LPM4_bits);

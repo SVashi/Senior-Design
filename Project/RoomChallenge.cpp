@@ -26,6 +26,7 @@ void RoomChallenge()
     }
     while(getData() < minButtonVal){    //enter LPM until challenge completed
         __low_power_mode_3();
+        if(fullChargeFlag&BIT2) break; //break for low power
     }
     addSucceed();
 }

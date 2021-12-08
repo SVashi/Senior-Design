@@ -15,6 +15,9 @@
 #define EPD_WIDTH   200
 #define EPD_HEIGHT  200
 
+//for use with timer flags
+extern uint8_t fullChargeFlag; //BIT0=flagADC, BIT1=flagTimer
+
 void Delay_ms(uint16_t millis);
 void EPD_Init(void);
 void EPD_ClearScreen(void);

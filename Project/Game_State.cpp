@@ -21,6 +21,10 @@ void setState(uint8_t stateUpdate){
     GameState.state = stateUpdate;
 }
 
+void setOldState(){
+    GameState.oldState = GameState.state;
+}
+
 uint8_t getButtonPress(int _buttonNum){
     int buttonNum = _buttonNum;
     uint8_t numPresses;

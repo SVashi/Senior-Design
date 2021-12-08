@@ -16,6 +16,7 @@ int playerTurn(int currentHP)
     int minButtonPress = 5;
 
     while(getAttack() < minButtonPress){
+        if(fullChargeFlag&BIT2) break; //break for low power
         __low_power_mode_3();
     }
     currentHP = currentHP - 100;
@@ -35,6 +36,7 @@ void BossBattle()
     int bossHP = 100 + getFail() * 10;
     while (playerHP > 0 && bossHP > 0)
     {
+        if(fullChargeFlag&BIT2) break; //break for low power
         bossHP = playerTurn(bossHP);
         if (bossHP > 0)
         {

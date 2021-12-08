@@ -19,5 +19,4 @@ extern const uint8_t IMAGE_R1[];
 extern const uint8_t IMAGE_R2[];
 extern const uint8_t IMAGE_RMSUC[];
 
-
 #endif /* IMG_H_ */

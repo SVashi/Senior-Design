@@ -7,11 +7,17 @@
 #include <ctpl.h>
 
 
-#define ADC_MONITOR_THRESHOLD   3.0
-#define ADC_MONITOR_FREQUENCY   1000
+//Vout = Vin * (R2/(R1+R2))
+#define R2                         9.0
+#define R1                         10.0
+#define ADC_MONITOR_THRESHOLD_HI   4
+#define ADC_MONITOR_THRESHOLD_LO   3.2
+
+#define ADC_MONITOR_FREQUENCY   100
 
 #define MCLK_FREQUENCY          1000000
 #define SMCLK_FREQUENCY         1000000
+#define ACLK_FREQUENCY          32000
 
 #define B1  BIT1
 #define B2  BIT3
@@ -23,7 +29,9 @@
 void GPIO_Init(void);
 void SPI_Init(void);
 void CLK_Init(void);
-//void ADC_Init(void);
+void ADC_Init(void);
+
+uint8_t fullChargeFlag = 0;
 
 int main(void)
 {
@@ -33,19 +41,32 @@ int main(void)
     GPIO_Init();
     SPI_Init();
     CLK_Init();
-    //ADC_Init();
+    ADC_Init();
+    __enable_interrupt();
+
+    // Set P1.0 to outputs for ADC
+    //delete later
+    P3SEL1 &= ~BIT4;
+    P3SEL0 &= ~BIT4;
+    P3SEL1 &= ~BIT5;
+    P3SEL0 &= ~BIT5;
+    P3DIR  |= BIT4|BIT5;
+    P3OUT  |= BIT4|BIT5;
 
     while(1){
         switch(getState()){
             case 0 : EPD_FullScreen(IMAGE_SPLASH);
                      __low_power_mode_3();
+                     if(fullChargeFlag&BIT2) break; //break for low power
                      setState(1);
                      break;
             case 1 : EPD_FullScreen(IMAGE_SELROOM);
                      __low_power_mode_3();
+                     if(fullChargeFlag&BIT2) break; //break for low power
                      setState(2);
                      break;
             case 2 : RoomChallenge();
+                     if(fullChargeFlag&BIT2) break; //break for low power
                      setState(3);
                      break;
             case 3 : EPD_FullScreen(IMAGE_RMSUC);
@@ -55,11 +76,41 @@ int main(void)
                          setState(4);
                      }
                      __low_power_mode_3();
+                     if(fullChargeFlag&BIT2) break; //break for low power
                      break;
             case 4 : BossBattle();
+                     if(fullChargeFlag&BIT2) break; //break for low power
                      EPD_ClearScreen();
                      EPD_Sleep();
                      clearGame();
+                     break;
+            case 5 : EPD_FullScreen(IMAGE_SPLASH); //low power detected
+                    //enable high level comparator
+                    ADC12IER2 |= ADC12HIIE;
+                    ADC12IER2 &= ~ADC12INIE;
+                    ADC12IFGR2 &= ~(ADC12INIFG|ADC12HIIFG);
+                    while(1){
+                        fullChargeFlag = 0;
+                        //wait until super-capacitor charged to high voltage threshold
+                        while(!fullChargeFlag&BIT0){
+                            __low_power_mode_3();
+                        }
+                        Delay_ms(5000); //start timer
+                        //wait for timer to finish
+                        while(fullChargeFlag == 0x01){
+                            __low_power_mode_3();
+                        }
+                        //if timer finsihed without low voltage detected
+                        //resume gameplay
+                        if(fullChargeFlag&BIT0){
+                            break;
+                        }
+                    }
+                     setState(GameState.oldState);
+                     //disable high level comparator
+                     ADC12IER2 &= ~(ADC12INIE|ADC12HIIE);
+                     ADC12IFGR2 &= ~(ADC12INIFG|ADC12HIIFG|ADC12LOIFG);
+                     ADC12IER2 |= ADC12LOIE; //enable low interrupts
                      break;
             }
 
@@ -78,6 +129,7 @@ void GPIO_Init(void){
     P7OUT  = 0; P7DIR  = 0xFF;
     P8OUT  = 0; P8DIR  = 0xFF;
     PJOUT  = 0; PJDIR  = 0xFFFF;
+
 
     // Set P3.0 to analog input for ADC
     P3SEL1 |= BIT0;
@@ -155,10 +207,11 @@ void CLK_Init(void){
 
 void ADC_Init(void){
     /* Initialize timer for ADC trigger. */
-    TA0CCR0 = (SMCLK_FREQUENCY/ADC_MONITOR_FREQUENCY);
-    TA0CCR1 = TA0CCR0/2;
-    TA0CCTL1 = OUTMOD_3;
-    TA0CTL = TASSEL__ACLK | MC__UP;
+    TA0CCR0 = (ACLK_FREQUENCY/ADC_MONITOR_FREQUENCY); //period of adc clock
+    TA0CCR1 = TA0CCR0/2; //half period
+    TA0CCTL1 = OUTMOD_3; //clock setup
+    TA0CTL = TASSEL__ACLK | MC__UP; //use ACLK as source
+
 
     /* Configure internal 2.0V reference. */
     while(REFCTL0 & REFGENBUSY);
@@ -183,13 +236,15 @@ void ADC_Init(void){
     //sets batmap to avcc
     //ADC12CTL3 = ADC12BATMAP;
 
-    //enable comparator window, using A12 (P3.0)
-    ADC12MCTL0 = ADC12INCH_12 | ADC12WINC;
-    ADC12HI = (uint16_t)(4096*((ADC_MONITOR_THRESHOLD+0.1)/2)/(2.0));
-    ADC12LO = (uint16_t)(4096*(ADC_MONITOR_THRESHOLD/2)/(2.0));
-    ADC12IFGR2 &= ~(ADC12HIIFG | ADC12LOIFG);
-    ADC12IER2 = ADC12HIIE;
-    ADC12CTL0 |= ADC12ENC;
+    //enable comparator window, using A12 (P3.0), Vr+=2.0V
+    ADC12MCTL0 = ADC12INCH_12 | ADC12VRSEL_1 | ADC12WINC;
+    //claculate threshold values based off of 2V ref
+    ADC12HI = (uint16_t)(4096*(ADC_MONITOR_THRESHOLD_HI*R2/(R1+R2))/(2.0));
+    ADC12LO = (uint16_t)(4096*(ADC_MONITOR_THRESHOLD_LO*R2/(R1+R2))/(2.0));
+
+    ADC12IFGR2 &= ~(ADC12HIIFG | ADC12LOIFG); //clear interrupts
+    ADC12IER2 |= ADC12LOIE; //enable both low and high interrupts
+    ADC12CTL0 |= ADC12ENC; //enable ADC
 }
 
 #if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
@@ -220,8 +275,14 @@ void __attribute__ ((interrupt(PORT5_VECTOR))) EXT_Button_ISR (void)
     __bic_SR_register_on_exit(LPM4_bits);
 }
 
+#if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
 #pragma vector = ADC12_VECTOR
 __interrupt void ADC12_ISR(void)
+#elif defined(__GNUC__)
+void __attribute__ ((interrupt(ADC12_VECTOR))) ADC12_ISR (void)
+#else
+#error Compiler not supported!
+#endif
 {
     switch(__even_in_range(ADC12IV, ADC12IV_ADC12LOIFG)) {
         case ADC12IV_NONE:        break;        // Vector  0: No interrupt
@@ -229,22 +290,38 @@ __interrupt void ADC12_ISR(void)
         case ADC12IV_ADC12TOVIFG: break;        // Vector  4: Conversion time overflow
         case ADC12IV_ADC12HIIFG:                // Vector  6: Window comparator high side
 
-            /* Disable the high side and enable the low side interrupt. */
+            fullChargeFlag |= BIT0;
+
+            /* Disable the high side and enable the mid side interrupt. */
             ADC12IER2 &= ~ADC12HIIE;
-            ADC12IER2 |= ADC12LOIE;
-            ADC12IFGR2 &= ~ADC12LOIFG;
+            ADC12IER2 |= ADC12INIE;
+            ADC12IFGR2 &= ~ADC12HIIFG;
             break;
         case ADC12IV_ADC12LOIFG:                // Vector  8: Window comparator low side
 
             /* Enter device shutdown with 64ms timeout. */
-            ctpl_enterShutdown(CTPL_SHUTDOWN_TIMEOUT_64_MS);
+            setOldState();
+            setState(5);
+            fullChargeFlag |= BIT2;
+            //ctpl_enterShutdown(CTPL_SHUTDOWN_TIMEOUT_64_MS);
 
-            /* Disable the low side and enable the high side interrupt. */
+
+            /* Disable the low side interrupt. */
             ADC12IER2 &= ~ADC12LOIE;
-            ADC12IER2 |= ADC12HIIE;
-            ADC12IFGR2 &= ~ADC12HIIFG;
+            ADC12IFGR2 &= ~ADC12LOIFG;
             break;
+        //this case is for testing delete later
+        case ADC12IV_ADC12INIFG:                // Vector  8: Window comparator low side
+            fullChargeFlag &= ~BIT0;
+
+            /* Disable the mid side and enable the high side interrupt. */
+            ADC12IER2 |= ADC12HIIE;
+            ADC12IER2 &= ~ADC12INIE;
+            ADC12IFGR2 &= ~ADC12INIFG;
+            break;
+
         default: break;
     }
-
+    //__low_power_mode_off_on_exit();
+    __bic_SR_register_on_exit(LPM4_bits);
 }
