@@ -14,7 +14,11 @@ uint8_t getState(){
 }
 
 void clearGame(){
-    GameState = {0};
+    setState(0);
+    clearButtonPress();
+    clearSucceed();
+    clearFail();
+    clearRoomChallenge();
 }
 
 void setState(uint8_t stateUpdate){
