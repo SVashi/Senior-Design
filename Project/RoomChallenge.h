@@ -5,5 +5,5 @@
 #include "CrankChallenge.h"
 #include "IMG.h"
 void RoomChallenge();
-void RoomChallenge1(uint8_t minButtonVal, uint16_t minTimeVal);
-void RoomChallenge2(uint8_t minButtonVal, uint16_t minTimeVal);
+bool RoomChallenge1(uint8_t minButtonVal, uint16_t minTimeVal);
+bool RoomChallenge2(uint8_t minButtonVal, uint16_t minTimeVal);
