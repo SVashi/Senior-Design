@@ -16,8 +16,9 @@ int playerTurn(int currentHP)
     int minButtonPress = 5;
 
     while(getAttack() < minButtonPress){
-        if(fullChargeFlag&BIT2) break; //break for low power
+        if(fullChargeFlag&BIT2) return currentHP; //break for low power
         __low_power_mode_3();
+        if(fullChargeFlag&BIT2) return currentHP; //break for low power
     }
     currentHP = currentHP - 100;
     return currentHP;
@@ -32,12 +33,14 @@ int bossTurn(int currentHP)
 void BossBattle()
 {
     EPD_FullScreen(IMAGE_BOSS1);
+    if(fullChargeFlag&BIT2) return; //break for low power
+
     int playerHP = 100 + getSucceed() * 10;
     int bossHP = 100 + getFail() * 10;
     while (playerHP > 0 && bossHP > 0)
     {
-        if(fullChargeFlag&BIT2) break; //break for low power
         bossHP = playerTurn(bossHP);
+        if(fullChargeFlag&BIT2) return; //break for low power
         if (bossHP > 0)
         {
             playerHP = bossTurn(playerHP);

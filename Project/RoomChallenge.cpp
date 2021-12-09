@@ -25,10 +25,31 @@ void RoomChallenge()
         addRoomChallenge();
     }
     while(getData() < minButtonVal){    //enter LPM until challenge completed
+        //break for low power
+        if(fullChargeFlag&BIT2) {
+            if(getRoomChallenge()>0) {
+                subRoomChallenge();
+            }
+            else {
+                addRoomChallenge();
+            }
+            return;
+        }
+
         __low_power_mode_3();
-        if(fullChargeFlag&BIT2) break; //break for low power
+
+        //break for low power
+        if(fullChargeFlag&BIT2) {
+            if(getRoomChallenge()>0) {
+                subRoomChallenge();
+            }
+            else {
+                addRoomChallenge();
+            }
+            return;
+        }
     }
-    addSucceed();
+        addSucceed();
 }
 
 

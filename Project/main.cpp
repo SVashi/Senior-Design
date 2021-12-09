@@ -49,11 +49,13 @@ int main(void)
     while(1){
         switch(getState()){
             case 0 : EPD_FullScreen(IMAGE_SPLASH);
+                     if(fullChargeFlag&BIT2) break; //break for low power
                      __low_power_mode_3();
                      if(fullChargeFlag&BIT2) break; //break for low power
                      setState(1);
                      break;
             case 1 : EPD_FullScreen(IMAGE_SELROOM);
+                     if(fullChargeFlag&BIT2) break; //break for low power
                      __low_power_mode_3();
                      if(fullChargeFlag&BIT2) break; //break for low power
                      setState(2);
@@ -63,18 +65,20 @@ int main(void)
                      setState(3);
                      break;
             case 3 : EPD_FullScreen(IMAGE_RMSUC);
+                     if(fullChargeFlag&BIT2) break; //break for low power
+                     __low_power_mode_3();
+                     if(fullChargeFlag&BIT2) break; //break for low power
+                     //decide if boss should be next
                      if(getSucceed() < NUM_CHALLENGES){
                          setState(2);
                      } else {
                          setState(4);
                      }
-                     __low_power_mode_3();
-                     if(fullChargeFlag&BIT2) break; //break for low power
                      break;
             case 4 : BossBattle();
                      if(fullChargeFlag&BIT2) break; //break for low power
-                     EPD_ClearScreen();
-                     EPD_Sleep();
+                     //EPD_ClearScreen();
+                     //EPD_Sleep();
                      clearGame();
                      break;
             case 5 : EPD_FullScreen(IMAGE_SPLASH); //low power detected
@@ -107,10 +111,13 @@ int main(void)
                         }
                     }
                      setState(GameState.oldState);
-                     //disable high level comparator
+                     //disable high level ADC comparator
                      ADC12IER2 &= ~(ADC12INIE|ADC12HIIE);
                      ADC12IFGR2 &= ~(ADC12INIFG|ADC12HIIFG|ADC12LOIFG);
-                     ADC12IER2 |= ADC12LOIE; //enable low interrupts
+
+                     P5IFG = 0; //reset button presses
+                     P5IE  |= BIT1 | BIT3 | BIT6 | BIT7; //enable button interrupts
+                     ADC12IER2 |= ADC12LOIE; //enable low side ADC interrupts
                      break;
             }
 
@@ -317,6 +324,7 @@ void __attribute__ ((interrupt(ADC12_VECTOR))) ADC12_ISR (void)
             if(getState()!=5) { setOldState(); }
             setState(5);
             fullChargeFlag |= BIT2;
+            P5IE  &= ~(BIT1 | BIT3 | BIT6 | BIT7); // disable button interrupts
             //ctpl_enterShutdown(CTPL_SHUTDOWN_TIMEOUT_64_MS);
 
 
@@ -333,6 +341,7 @@ void __attribute__ ((interrupt(ADC12_VECTOR))) ADC12_ISR (void)
             ADC12IER2 &= ~ADC12INIE;
             ADC12IFGR2 &= ~ADC12INIFG;
             break;
+
 
         default: break;
     }

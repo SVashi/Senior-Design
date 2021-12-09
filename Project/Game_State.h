@@ -40,6 +40,7 @@ void addFail();
 uint8_t getRoomChallenge();
 void clearRoomChallenge();
 void addRoomChallenge();
+void subRoomChallenge();
 
 
 #endif /* GAME_STATE_H_ */

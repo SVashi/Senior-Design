@@ -89,3 +89,7 @@ void clearRoomChallenge(){
 void addRoomChallenge(){
     GameState.roomChallenge +=1;
 }
+
+void subRoomChallenge(){
+    GameState.roomChallenge -=1;
+}
