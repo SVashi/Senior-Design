@@ -308,6 +308,7 @@ void EPD_FullScreen(const uint8_t *image){
     EPD_DisplayImage(image);
     EPD_Sleep();
     }
+
 }
 // Timer B0 interrupt service routine
 #if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
