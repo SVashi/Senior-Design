@@ -50,6 +50,7 @@ void RoomChallenge1(uint8_t minButtonVal, uint16_t minTimeVal){
 
     //Crank Challenge
     EPD_FullScreen(IMAGE_R1);
+    CrankChallenge(minTimeVal);
 
 }
 
