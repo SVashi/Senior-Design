@@ -219,7 +219,10 @@ void ADC_Init(void){
     ADC12LO = (uint16_t)(4096*(ADC_MONITOR_THRESHOLD_LO*R2/(R1+R2))/(2.0));
 
     ADC12IFGR2 &= ~(ADC12HIIFG | ADC12LOIFG); //clear interrupts
-    ADC12IER2 |= ADC12LOIE; //enable both low and high interrupts
+    //if not in crank challenge
+    if(getRoomChallenge()%2){
+        ADC12IER2 |= ADC12LOIE; //enable low and interrupts
+    }
     ADC12CTL0 |= ADC12ENC; //enable ADC
 }
 
