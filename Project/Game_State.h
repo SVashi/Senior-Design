@@ -13,6 +13,7 @@
 typedef struct GameState {
     uint8_t state;
     uint8_t oldState;
+    uint8_t returnState;
     uint8_t b1Press;
     uint8_t b2Press;
     uint8_t b3Press;
@@ -26,7 +27,9 @@ extern gameState GameState;
 
 uint8_t getState();
 void setState(uint8_t stateUpdate);
-void setOldState();
+uint8_t getOldState();
+uint8_t getReturnState();
+void setReturnState();
 void clearGame();
 uint8_t getButtonPress(int buttonNum);
 void clearButtonPress();

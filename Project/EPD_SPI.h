@@ -10,6 +10,7 @@
 
 #include <msp430.h>
 #include "stdint.h"
+#include "Game_State.h"
 
 /* Define Display Resolution */
 #define EPD_WIDTH   200

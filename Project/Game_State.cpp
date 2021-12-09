@@ -18,11 +18,20 @@ void clearGame(){
 }
 
 void setState(uint8_t stateUpdate){
+    GameState.oldState = GameState.state;
     GameState.state = stateUpdate;
 }
 
-void setOldState(){
-    GameState.oldState = GameState.state;
+uint8_t getOldState(){
+    return GameState.oldState;
+}
+
+uint8_t getReturnState(){
+    return GameState.oldState;
+}
+
+void setReturnState(){
+    GameState.returnState = GameState.state;
 }
 
 uint8_t getButtonPress(int _buttonNum){

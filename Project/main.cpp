@@ -110,7 +110,7 @@ int main(void)
                             break;
                         }
                     }
-                     setState(GameState.oldState);
+                     setState(getReturnState());
                      //disable high level ADC comparator
                      ADC12IER2 &= ~(ADC12INIE|ADC12HIIE);
                      ADC12IFGR2 &= ~(ADC12INIFG|ADC12HIIFG|ADC12LOIFG);
@@ -321,7 +321,7 @@ void __attribute__ ((interrupt(ADC12_VECTOR))) ADC12_ISR (void)
         case ADC12IV_ADC12LOIFG:                // Vector  8: Window comparator low side
 
             /* Enter device shutdown with 64ms timeout. */
-            if(getState()!=5) { setOldState(); }
+            if(getState()!=5) { setReturnState(); }
             setState(5);
             fullChargeFlag |= BIT2;
             P5IE  &= ~(BIT1 | BIT3 | BIT6 | BIT7); // disable button interrupts

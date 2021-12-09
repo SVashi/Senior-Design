@@ -300,11 +300,12 @@ void EPD_Sleep(void){
 }
 
 void EPD_FullScreen(const uint8_t *image){
+    //check if the current screen does not match current
+    if(getOldState() != getState()){
     EPD_Init();
-    //EPD_ClearScreen();
-    //Delay_ms(100);
     EPD_DisplayImage(image);
     EPD_Sleep();
+    }
 }
 // Timer B0 interrupt service routine
 #if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
