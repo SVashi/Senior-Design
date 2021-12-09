@@ -301,7 +301,9 @@ void EPD_Sleep(void){
 
 void EPD_FullScreen(const uint8_t *image){
     //check if the current screen does not match current
-    if(getOldState() != getState()){
+    uint8_t old = getOldState();
+    uint8_t current = getState();
+    if(old != current){
     EPD_Init();
     EPD_DisplayImage(image);
     EPD_Sleep();

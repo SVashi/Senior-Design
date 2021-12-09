@@ -31,7 +31,7 @@ uint8_t getOldState(){
 }
 
 uint8_t getReturnState(){
-    return GameState.oldState;
+    return GameState.returnState;
 }
 
 void setReturnState(){
