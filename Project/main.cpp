@@ -8,8 +8,8 @@
 
 
 //Vout = Vin * (R2/(R1+R2))
-#define R2                         9.0
-#define R1                         10.0
+#define R2                         10.0
+#define R1                         11.0
 #define ADC_MONITOR_THRESHOLD_HI   4
 #define ADC_MONITOR_THRESHOLD_LO   3.2
 
@@ -30,6 +30,7 @@ void GPIO_Init(void);
 void SPI_Init(void);
 void CLK_Init(void);
 void ADC_Init(void);
+void Comp_Init(void);
 
 uint8_t fullChargeFlag = 0;
 
@@ -42,16 +43,8 @@ int main(void)
     SPI_Init();
     CLK_Init();
     ADC_Init();
+    //Comp_Init();
     __enable_interrupt();
-
-    // Set P1.0 to outputs for ADC
-    //delete later
-    P3SEL1 &= ~BIT4;
-    P3SEL0 &= ~BIT4;
-    P3SEL1 &= ~BIT5;
-    P3SEL0 &= ~BIT5;
-    P3DIR  |= BIT4|BIT5;
-    P3OUT  |= BIT4|BIT5;
 
     while(1){
         switch(getState()){
@@ -95,8 +88,15 @@ int main(void)
                         while(!fullChargeFlag&BIT0){
                             __low_power_mode_3();
                         }
-                        Delay_ms(5000); //start timer
-                        //wait for timer to finish
+
+                        //Initialize Timer_B0 to use as delay counter
+                        TB0CCTL0 = CCIE_0;                            // TBCCR0 interrupt disabled
+                        TB0CCR0 = 0;                                // Set CCR to 0
+                        TB0CTL = TBSSEL__ACLK | ID__8 | MC__UP;     // ACLK, Divided 8, up mode
+                        TB0EX0 = TBIDEX_3;                          // ACLK = 32/8/4 = 1kHz = 1ms/count
+                        TB0CCR0 = 3000;                           // Set CCR to delay time
+                        TB0CCTL0 = CCIE;                            // TBCCR0 interrupt enabled
+
                         while(fullChargeFlag == 0x01){
                             __low_power_mode_3();
                         }
@@ -169,7 +169,7 @@ void GPIO_Init(void){
     // Set Up LFXT pins for 32kHz crystal
     PJSEL0 |= BIT4 | BIT5;
 
-    // Set up Buttons
+    // Set up Buttons and Button interrupts
     P5DIR &= ~BIT1 & ~BIT3 & ~BIT6 & ~BIT7;
     P5OUT |= BIT1 | BIT3 | BIT6 | BIT7;               // button pull up
     P5REN |= BIT1 | BIT3 | BIT6 | BIT7;               // button pull up/down resistor enable
@@ -247,6 +247,20 @@ void ADC_Init(void){
     ADC12CTL0 |= ADC12ENC; //enable ADC
 }
 
+void Comp_Init(void)
+{
+    /* Setup COMP_E for P3.1 (C13) input with 1.5v reference. */
+    CECTL0 = CEIPEN | CEIPSEL_13;//used for settin comparator to outputs of micro,
+    CECTL1 = CEPWRMD_1 | CEMRVS;
+    CECTL2 = CEREFL_2 | CERS_2 | CERSEL | CEREF0_23;
+    CECTL3 = CEPD13;
+    CEINT = CEIIE;
+    CECTL1 |= CEON;
+
+    /* Delay for the reference to settle */
+    __delay_cycles(75);
+}
+
 #if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
 #pragma vector=PORT5_VECTOR
 __interrupt void  EXT_Button_ISR(void)
@@ -300,7 +314,7 @@ void __attribute__ ((interrupt(ADC12_VECTOR))) ADC12_ISR (void)
         case ADC12IV_ADC12LOIFG:                // Vector  8: Window comparator low side
 
             /* Enter device shutdown with 64ms timeout. */
-            setOldState();
+            if(getState()!=5) { setOldState(); }
             setState(5);
             fullChargeFlag |= BIT2;
             //ctpl_enterShutdown(CTPL_SHUTDOWN_TIMEOUT_64_MS);
@@ -325,3 +339,18 @@ void __attribute__ ((interrupt(ADC12_VECTOR))) ADC12_ISR (void)
     //__low_power_mode_off_on_exit();
     __bic_SR_register_on_exit(LPM4_bits);
 }
+
+#pragma vector=COMP_E_VECTOR
+__interrupt void COMP_E_ISR(void)
+{
+    switch (__even_in_range(CEIV, CEIV_CERDYIFG)) {
+        case CEIV_NONE:        break;
+        case CEIV_CEIFG:    break;
+        case CEIV_CEIIFG:
+            /* Enter device shutdown with 64ms timeout. */
+            ctpl_enterShutdown(CTPL_SHUTDOWN_TIMEOUT_64_MS);
+            break;
+        case CEIV_CERDYIFG:    break;
+    }
+}
+

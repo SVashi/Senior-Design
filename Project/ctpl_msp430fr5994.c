@@ -38,7 +38,7 @@
 //#define CTPL_SAVE_CRC32
 //#define CTPL_SAVE_TA2
 //#define CTPL_SAVE_TA3
-//#define CTPL_SAVE_TA0
+#define CTPL_SAVE_TA0
 //#define CTPL_SAVE_TA1
 //#define CTPL_SAVE_TA4
 #define CTPL_SAVE_TB0
@@ -51,8 +51,8 @@
 //#define CTPL_SAVE_EUSCIB2
 //#define CTPL_SAVE_EUSCIB3
 //#define CTPL_SAVE_REF_A
-//#define CTPL_SAVE_COMP_E
-//#define CTPL_SAVE_ADC12_B
+#define CTPL_SAVE_COMP_E
+#define CTPL_SAVE_ADC12_B
 //#define CTPL_SAVE_DMA
 #define CTPL_SAVE_WDT_A
 
