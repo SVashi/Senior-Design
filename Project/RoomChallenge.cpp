@@ -21,7 +21,7 @@ void RoomChallenge()
 
 bool RoomChallenge1(uint8_t minButtonVal, uint16_t minTimeVal){
     EPD_FullScreen(IMAGE_R1);
-    while((getButtonPress(1) < minButtonVal) && (getButtonPress(4) < minButtonVal)){    //enter LPM until challenge completed
+    while(1){    //enter LPM until challenge completed
        //break for low power
        if(fullChargeFlag&BIT2) {
            return false;
@@ -30,6 +30,12 @@ bool RoomChallenge1(uint8_t minButtonVal, uint16_t minTimeVal){
        //break for low power
        if(fullChargeFlag&BIT2) {
            return false;
+       }
+
+       if(getButtonPress(2) > minButtonVal){
+           if(getButtonPress(3) > minButtonVal){
+               break;
+           }
        }
     }
 
@@ -42,7 +48,7 @@ bool RoomChallenge1(uint8_t minButtonVal, uint16_t minTimeVal){
 
 bool RoomChallenge2(uint8_t minButtonVal, uint16_t minTimeVal){
     EPD_FullScreen(IMAGE_R2);
-    while((getButtonPress(2) < minButtonVal) && (getButtonPress(3) < minButtonVal)){    //enter LPM until challenge completed
+    while(1){    //enter LPM until challenge completed
        //break for low power
        if(fullChargeFlag&BIT2) {
            return false;
@@ -51,6 +57,11 @@ bool RoomChallenge2(uint8_t minButtonVal, uint16_t minTimeVal){
        //break for low power
        if(fullChargeFlag&BIT2) {
            return false;
+       }
+       if(getButtonPress(1) > minButtonVal){
+           if(getButtonPress(4) > minButtonVal){
+               break;
+           }
        }
     }
 
