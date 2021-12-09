@@ -302,12 +302,7 @@ void EPD_Sleep(void){
 void EPD_FullScreen(const uint8_t *image){
     uint8_t old = getOldState();
     uint8_t current = getState();
-    //check if the current screen does not match current
-<<<<<<< HEAD
-    uint8_t old = getOldState();
-    uint8_t current = getState();
-=======
->>>>>>> branch 'main' of https://git.ece.iastate.edu/svashi/ccs-senior-design.git
+
     if(old != current){
     EPD_Init();
     EPD_DisplayImage(image);
