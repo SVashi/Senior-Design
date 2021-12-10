@@ -85,7 +85,7 @@ int main(void)
                      clearGame();
                      break;
             case 5 : EPD_FullScreen(IMAGE_SPLASH); //low power detected
-                     CrankChallenge(3000);
+                     CrankChallenge(2000);
                      setState(getReturnState());
                      break;
             }
