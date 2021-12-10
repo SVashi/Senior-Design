@@ -2,25 +2,35 @@
 #include "BossBattle.h"
 
 
-int getAttack()
-{
-    int count = (getButtonPress(2)+getButtonPress(3))/2;
-    return count;
-}
-
 int playerTurn(int currentHP)
 {
-    clearButtonPress();
-    int minButtonPress = 5;
-    EPD_FullScreen(IMAGE_BOSS1);
-    if(fullChargeFlag&BIT2) return currentHP;
+    if(getRoomChallenge() != 1){
+        clearButtonPress();
+        int minButtonPress = 5;
+        EPD_FullScreen(IMAGE_BOSS1);
+        if(fullChargeFlag&BIT2) return currentHP;
 
-    while(getAttack() < minButtonPress){
-        if(fullChargeFlag&BIT2) return currentHP; //break for low power
-        __low_power_mode_3();
-        if(fullChargeFlag&BIT2) return currentHP; //break for low power
+        while(1){    //enter LPM until challenge completed
+           //break for low power
+           if(fullChargeFlag&BIT2) {
+               return false;
+           }
+           __low_power_mode_3();
+           //break for low power
+           if(fullChargeFlag&BIT2) {
+               return false;
+           }
+
+           if(getButtonPress(2) > minButtonPress){
+               if(getButtonPress(3) > minButtonPress){
+                   break;
+               }
+           }
+        }
+        EPD_FullScreen(IMAGE_BOSS2);
     }
-    EPD_FullScreen(IMAGE_BOSS2);
+
+    GameState.roomChallenge = 1; //on wakeup don't go to low power
     CrankChallenge(4000);
     currentHP = currentHP - 100;
     return currentHP;
@@ -34,8 +44,10 @@ int bossTurn(int currentHP)
 
 void BossBattle()
 {
-    EPD_FullScreen(IMAGE_BOSSINT);
-    if(fullChargeFlag&BIT2) return; //break for low power
+    if(getRoomChallenge() != 1){
+        EPD_FullScreen(IMAGE_BOSSINT);
+        if(fullChargeFlag&BIT2) return; //break for low power
+    }
 
     int playerHP = 100 + getSucceed() * 10;
     int bossHP = 100 + getFail() * 10;
@@ -48,7 +60,6 @@ void BossBattle()
             playerHP = bossTurn(playerHP);
         }
     }
-    EPD_FullScreen(IMAGE_BOSSSUC);
-    if(fullChargeFlag&BIT2) return; //break for low power
+
 }
 

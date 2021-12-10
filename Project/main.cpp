@@ -52,9 +52,9 @@ int main(void)
     while(1){
         switch(getState()){
             case 0 : EPD_FullScreen(IMAGE_SPLASH);
-                     if(fullChargeFlag&BIT2) break; //break for low power
-                     __low_power_mode_3();
-                     if(fullChargeFlag&BIT2) break; //break for low power
+                     GameState.roomChallenge = 1; //on wakeup don't go to low power
+                     CrankChallenge(1000);
+                     clearRoomChallenge();
                      setState(1);
                      break;
             case 1 : EPD_FullScreen(IMAGE_SELROOM);
@@ -83,20 +83,28 @@ int main(void)
                      EPD_ClearScreen();
                      EPD_Sleep();
                      clearGame();
-                     if(fullChargeFlag&BIT2) return; //break for low power
-                     __low_power_mode_3();
-                     if(fullChargeFlag&BIT2) return; //break for low power
-                     if(getButtonPress(2)){
-                         setState(1);
-                     } else{
-                         setState(0);
-                     }
-                     clearButtonPress();
+                     setState(6);
                      break;
             case 5 : EPD_FullScreen(IMAGE_SPLASH); //low power detected
-                     CrankChallenge(2000);
+                     CrankChallenge(1000);
                      setState(getReturnState());
                      break;
+            case 6 : EPD_FullScreen(IMAGE_BOSSSUC);
+                     clearButtonPress();
+                     while(1){
+                         if(fullChargeFlag&BIT2) break; //break for low power
+                         __low_power_mode_3();
+                         if(fullChargeFlag&BIT2) break; //break for low power
+                         if(getButtonPress(2)){
+                             setState(1);
+                             break;
+                         } else if (getButtonPress(3)){
+                             setState(0);
+                             break;
+                         }
+                     }
+                     clearButtonPress();
+                     if(fullChargeFlag&BIT2) break; //break for low power
             }
 
     }
@@ -229,7 +237,7 @@ void ADC_Init(void){
 
     ADC12IFGR2 &= ~(ADC12HIIFG | ADC12LOIFG); //clear interrupts
     //if not in crank challenge
-    if(getRoomChallenge()%2){
+    if(!(getRoomChallenge()%2)){
         ADC12IER2 |= ADC12LOIE; //enable low and interrupts
     }
     ADC12CTL0 |= ADC12ENC; //enable ADC

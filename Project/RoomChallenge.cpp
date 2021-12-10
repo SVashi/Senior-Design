@@ -6,11 +6,11 @@ void RoomChallenge()
     clearButtonPress();
     //challenge determination
     if(getRoomChallenge()<2){           //challenge 1
-        if(RoomChallenge1(10,2000)){
+        if(RoomChallenge1(40,2000)){
             addSucceed();
         }
     } else{                             //challenge 2 (reset case)
-        if(RoomChallenge2(5,3000)){ //5 button presses, 3 seconds of full crank turning
+        if(RoomChallenge2(25,3000)){ //5 button presses, 3 seconds of full crank turning
             clearRoomChallenge();
             addSucceed();
         }
