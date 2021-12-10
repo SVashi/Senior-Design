@@ -3,4 +3,5 @@
 #include "EPD_SPI.h"
 #include "IMG.h"
 #include "Game_State.h"
+#include "CrankChallenge.h"
 void BossBattle();

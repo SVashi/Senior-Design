@@ -1,12 +1,10 @@
 
 #include "BossBattle.h"
 
+
 int getAttack()
 {
-    int count = 0;
-    for(int i=1; i<5; i++){
-        count += getButtonPress(i);
-    }
+    int count = (getButtonPress(2)+getButtonPress(3))/2;
     return count;
 }
 
@@ -14,12 +12,17 @@ int playerTurn(int currentHP)
 {
     clearButtonPress();
     int minButtonPress = 5;
+    EPD_FullScreen(IMAGE_BOSS1);
+    if(fullChargeFlag&BIT2) return currentHP;
 
     while(getAttack() < minButtonPress){
         if(fullChargeFlag&BIT2) return currentHP; //break for low power
         __low_power_mode_3();
         if(fullChargeFlag&BIT2) return currentHP; //break for low power
     }
+    EPD_FullScreen(IMAGE_BOSS2);
+    if(fullChargeFlag&BIT2) return currentHP; //break for low power
+    CrankChallenge(4000);
     currentHP = currentHP - 100;
     return currentHP;
 }
@@ -32,7 +35,7 @@ int bossTurn(int currentHP)
 
 void BossBattle()
 {
-    EPD_FullScreen(IMAGE_BOSS1);
+    EPD_FullScreen(IMAGE_BOSSINT);
     if(fullChargeFlag&BIT2) return; //break for low power
 
     int playerHP = 100 + getSucceed() * 10;
@@ -46,10 +49,6 @@ void BossBattle()
             playerHP = bossTurn(playerHP);
         }
     }
-
-
-
-
-
-
+    EPD_FullScreen(IMAGE_BOSSSUC);
 }
+
