@@ -21,7 +21,6 @@ int playerTurn(int currentHP)
         if(fullChargeFlag&BIT2) return currentHP; //break for low power
     }
     EPD_FullScreen(IMAGE_BOSS2);
-    if(fullChargeFlag&BIT2) return currentHP; //break for low power
     CrankChallenge(4000);
     currentHP = currentHP - 100;
     return currentHP;
@@ -50,5 +49,6 @@ void BossBattle()
         }
     }
     EPD_FullScreen(IMAGE_BOSSSUC);
+    if(fullChargeFlag&BIT2) return; //break for low power
 }
 

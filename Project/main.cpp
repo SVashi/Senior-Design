@@ -83,6 +83,15 @@ int main(void)
                      EPD_ClearScreen();
                      EPD_Sleep();
                      clearGame();
+                     if(fullChargeFlag&BIT2) return; //break for low power
+                     __low_power_mode_3();
+                     if(fullChargeFlag&BIT2) return; //break for low power
+                     if(getButtonPress(2)){
+                         setState(1);
+                     } else{
+                         setState(0);
+                     }
+                     clearButtonPress();
                      break;
             case 5 : EPD_FullScreen(IMAGE_SPLASH); //low power detected
                      CrankChallenge(3000);
